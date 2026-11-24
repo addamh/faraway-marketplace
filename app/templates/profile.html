@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Profile · Faraway Finds{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Profile</h1></div></div>
+
+<form method="post" action="/profile" class="stack">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <section class="panel stack">
+    <h2>About you</h2>
+    <div class="row">
+      <label class="grow">Name <input name="name" value="{{ user.name }}" required maxlength="120"></label>
+      <label class="grow">Best way to reach you
+        <input name="contact" value="{{ user.contact }}" maxlength="200" placeholder="e.g. Slack @sam, or text me">
+      </label>
+    </div>
+    <p class="muted small">Members can see your name, email and this note so they can ask you about a find.</p>
+  </section>
+
+  <section class="panel stack">
+    <h2>Pickup area</h2>
+    <label class="check">
+      <input type="checkbox" name="is_helper" {{ 'checked' if user.is_helper }}>
+      <span>I'm happy to pick things up for others around where I live</span>
+    </label>
+    <div class="row">
+      <label class="grow">City or postal code
+        <input name="area" value="{{ user.area_query or '' }}" placeholder="e.g. Dallas, TX">
+      </label>
+      <label>Willing to travel
+        <span class="joined">
+          <input name="radius" inputmode="numeric" value="{{ radius_value }}" size="4">
+          <select name="radius_unit" aria-label="Unit">
+            <option value="mi" {{ 'selected' if unit == 'mi' }}>miles</option>
+            <option value="km" {{ 'selected' if unit == 'km' }}>km</option>
+          </select>
+        </span>
+      </label>
+    </div>
+    {% if user.area_label %}
+    <p class="ok-text small">Searching around <strong>{{ user.area_label }}</strong>, within {{ user.radius_display }}.</p>
+    {% endif %}
+    <p class="muted small">Others only see your city and radius, never your exact location.</p>
+    {% if source_name == "facebook" %}
+    <label>Marketplace location <span class="muted">(optional)</span>
+      <input name="fb_location" value="{{ user.fb_location or '' }}" placeholder="paste a Marketplace URL for your area, or a slug like dallas">
+    </label>
+    <p class="muted small">If finds aren't showing up for your area: open Marketplace, set the location to your area, search for anything, and paste the page address here.</p>
+    {% endif %}
+  </section>
+
+  <div><button class="btn primary">Save profile</button></div>
+</form>
+
+<section class="panel stack">
+  <h2>Change password</h2>
+  <form method="post" action="/profile/password" class="row">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="grow">Current <input type="password" name="current" required autocomplete="current-password"></label>
+    <label class="grow">New <input type="password" name="new" required minlength="8" autocomplete="new-password"></label>
+    <div class="end"><button class="btn">Change</button></div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Faraway Finds{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23e8743b'/><circle cx='16' cy='16' r='5' fill='white'/></svg>">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="/">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="currentColor"/><circle cx="16" cy="16" r="5" fill="var(--bg)"/></svg>
+        Faraway Finds
+      </a>
+      {% if user %}
+      <nav class="nav">
+        <a href="/finds" class="{{ 'on' if path == '/finds' }}">Finds{% if nav_new %} <span class="pill">{{ nav_new }}</span>{% endif %}</a>
+        <a href="/searches" class="{{ 'on' if path == '/searches' }}">My searches</a>
+        <a href="/my-area" class="{{ 'on' if path == '/my-area' }}">In my area</a>
+        <a href="/people" class="{{ 'on' if path == '/people' }}">People</a>
+        <a href="/profile" class="{{ 'on' if path == '/profile' }}">Profile</a>
+        {% if user.is_admin %}<a href="/admin" class="{{ 'on' if path == '/admin' }}">Admin</a>{% endif %}
+        <form method="post" action="/logout" class="inline">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button class="linklike">Log out</button>
+        </form>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+  <main class="wrap">
+    {% for f in flashes %}<div class="flash {{ f.kind }}">{{ f.msg }}</div>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

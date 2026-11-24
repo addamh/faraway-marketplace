@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}My searches · Faraway Finds{% endblock %}
+{% block content %}
+{% macro search_fields(s=None) %}
+<label class="grow">Looking for
+  <input name="query" required maxlength="200" placeholder="e.g. gameboy mega man" value="{{ s.query if s else '' }}">
+</label>
+<div class="row">
+  <label>Min price <input name="min_price" inputmode="decimal" placeholder="any" value="{{ '%g' % s.min_price if s and s.min_price is not none else '' }}"></label>
+  <label>Max price <input name="max_price" inputmode="decimal" placeholder="any" value="{{ '%g' % s.max_price if s and s.max_price is not none else '' }}"></label>
+</div>
+<label class="check">
+  <input type="checkbox" name="strict" {{ 'checked' if (not s or s.strict) }}>
+  <span>Only titles containing every word <span class="muted">(Marketplace search is loose; this cuts out the junk)</span></span>
+</label>
+<details class="more" {{ 'open' if s and (s.must_include or s.exclude) }}>
+  <summary>More filters</summary>
+  <label>Title must also include <input name="must_include" placeholder="comma separated, e.g. cartridge, nintendo" value="{{ s.must_include if s else '' }}"></label>
+  <label>Skip titles containing <input name="exclude" placeholder="comma separated, e.g. repro, case, poster" value="{{ s.exclude if s else '' }}"></label>
+</details>
+{% endmacro %}
+<div class="page-head">
+  <div>
+    <h1>My searches</h1>
+    <p class="muted">
+      {% if helpers %}Each search runs daily near
+        {% for h in helpers %}{{ h.first_name }} <span class="muted">({{ (h.area_label or '').split(',')[0] }})</span>{{ ", " if not loop.last }}{% endfor %}.
+      {% else %}No one else has set a pickup area yet, so there's nowhere to search.{% endif %}
+      Prices are in each area's local currency.
+    </p>
+  </div>
+</div>
+
+<section class="panel">
+  <h2>New search</h2>
+  <form method="post" action="/searches" class="stack">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    {{ search_fields() }}
+    <div><button class="btn primary">Add search</button></div>
+  </form>
+</section>
+
+{% if searches %}
+<section class="list">
+  {% for s in searches %}
+  <article class="search-row {{ 'paused' if not s.active }}">
+    <div class="search-main">
+      <h3>{{ s.query }} {% if not s.active %}<span class="tag muted-tag">Paused</span>{% endif %}</h3>
+      <p class="muted small">
+        {% if s.min_price is not none or s.max_price is not none %}{{ '%g' % s.min_price if s.min_price is not none else '0' }}–{{ '%g' % s.max_price if s.max_price is not none else '∞' }} · {% endif %}
+        {{ "every word" if s.strict else "loose match" }}
+        {% if s.must_include %} · must include {{ s.must_include }}{% endif %}
+        {% if s.exclude %} · skipping {{ s.exclude }}{% endif %}
+        · last run {{ s.last_run_at | timeago }}
+      </p>
+    </div>
+    <a class="count" href="/finds?search={{ s.id }}">{{ counts.get(s.id, 0) }} find{{ 's' if counts.get(s.id, 0) != 1 }}</a>
+    <div class="row-actions">
+      <form method="post" action="/searches/{{ s.id }}" class="inline">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="btn small ghost" name="action" value="toggle">{{ "Pause" if s.active else "Resume" }}</button>
+        <button class="btn small ghost danger" name="action" value="delete" onclick="return confirm('Delete this search and its finds?')">Delete</button>
+      </form>
+    </div>
+    <details class="edit">
+      <summary>Edit</summary>
+      <form method="post" action="/searches/{{ s.id }}" class="stack">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        {{ search_fields(s) }}
+        <div><button class="btn primary small" name="action" value="save">Save changes</button></div>
+      </form>
+    </details>
+  </article>
+  {% endfor %}
+</section>
+{% endif %}
+{% endblock %}

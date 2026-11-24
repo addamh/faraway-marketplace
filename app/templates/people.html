@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}People · Faraway Finds{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>People</h1>
+    <p class="muted">Who can pick things up where, and what everyone's hunting for.</p>
+  </div>
+</div>
+<div class="people">
+  {% for p in people %}
+  <article class="person">
+    <div class="avatar" aria-hidden="true">{{ p.name[:1] | upper }}</div>
+    <div class="person-body">
+      <h3>{{ p.name }}{% if p.id == user.id %} <span class="muted small">(you)</span>{% endif %}</h3>
+      {% if p.has_area %}
+      <p class="small"><strong>Picks up around</strong> {{ p.area_label }} · {{ p.radius_display }}</p>
+      {% else %}
+      <p class="muted small">Not picking up for others</p>
+      {% endif %}
+      {% if p.contact %}<p class="small muted">{{ p.contact }}</p>{% endif %}
+      {% set active = p.searches | selectattr("active") | list %}
+      {% if active %}
+      <div class="tags">{% for s in active %}<span class="tag soft">{{ s.query }}</span>{% endfor %}</div>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% endblock %}

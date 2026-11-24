@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_card.html" import listing_card with context %}
+{% block title %}In my area · Faraway Finds{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Found in your area</h1>
+    <p class="muted">
+      {% if user.has_area %}Things others are after near {{ user.area_label }}. They may ask you to grab one.
+      {% else %}You haven't set a pickup area, so nothing is searched near you. <a href="/profile">Set one up</a>.{% endif %}
+    </p>
+  </div>
+</div>
+{% if user.has_area and not buyers %}
+<div class="empty"><h2>Nothing yet</h2><p>When someone's search turns up a listing near you, it shows here.</p></div>
+{% endif %}
+{% for b in buyers %}
+<section class="area">
+  <header class="area-head">
+    <div class="avatar" aria-hidden="true">{{ b.buyer.name[:1] | upper }}</div>
+    <div class="area-text"><h2>For {{ b.buyer.name }}</h2>{% if b.buyer.contact %}<p class="muted">{{ b.buyer.contact }}</p>{% endif %}</div>
+    <span class="count">{{ b.cards | length }} find{{ 's' if b.cards | length != 1 }}</span>
+  </header>
+  <div class="grid">{% for card in b.cards %}{{ listing_card(card, actions=False) }}{% endfor %}</div>
+</section>
+{% endfor %}
+{% endblock %}

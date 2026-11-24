@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Log in · Faraway Finds{% endblock %}
+{% block content %}
+<section class="auth">
+  <h1>Welcome back</h1>
+  <p class="muted">Finds from Marketplace in your friends' and coworkers' towns.</p>
+  <form method="post" action="/login" class="stack">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Email <input type="email" name="email" required autocomplete="email" autofocus></label>
+    <label>Password <input type="password" name="password" required autocomplete="current-password"></label>
+    <button class="btn primary">Log in</button>
+  </form>
+  <p class="muted small">New here? You'll need an invite link or code. <a href="/register">Create an account</a></p>
+</section>
+{% endblock %}

@@ -1,0 +1,2 @@
+for (;;);{"data":{"marketplace_search":{"feed_units":{"edges":[{"node":{"listing":{"id":"3333333333333333","marketplace_listing_title":"Megaman II Game Boy","listing_price":{"formatted_amount":"€40"},"primary_listing_photo":{"image":{"uri":"https://scontent.example/3.jpg"}},"location":{"reverse_geocode":{"city":"Paris"}}}}}]}}}}
+{"label":"extra","data":{"x":{"id":"4444444444444444","marketplace_listing_title":"Gameboy Color","is_pending":true,"listing_price":{"formatted_amount":"Free"}}}}

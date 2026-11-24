@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% from "_card.html" import listing_card with context %}
+{% block title %}Finds · Faraway Finds{% endblock %}
+{% block content %}
+{% set here = "/finds?show=" ~ show ~ ("&search=" ~ search_id if search_id else "") %}
+<div class="page-head">
+  <div>
+    <h1>Your finds</h1>
+    <p class="muted">
+      {% if last_run %}Last scan {{ last_run.started_at | timeago }}{% if last_run.status not in ("ok", "running") %} ({{ last_run.status }}){% endif %}.{% else %}No scans yet.{% endif %}
+      {% if next_run %}Next scan {{ next_run.strftime("%a %H:%M %Z") }}.{% endif %}
+    </p>
+  </div>
+  {% if nav_new %}
+  <form method="post" action="/finds/mark-seen">
+    <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="next" value="{{ here }}">
+    <button class="btn ghost">Mark all as seen</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if searches %}
+<div class="filters">
+  <div class="chips" role="tablist">
+    {% for key, label in [("all", "All"), ("new", "New"), ("saved", "Saved"), ("hidden", "Hidden")] %}
+    <a class="chip {{ 'on' if show == key }}" href="/finds?show={{ key }}{{ '&search=' ~ search_id if search_id else '' }}">{{ label }}{% if key == 'new' and nav_new %} · {{ nav_new }}{% endif %}</a>
+    {% endfor %}
+  </div>
+  <form method="get" action="/finds" class="inline">
+    <input type="hidden" name="show" value="{{ show }}">
+    <select name="search" onchange="this.form.submit()" aria-label="Filter by search">
+      <option value="">All searches</option>
+      {% for s in searches %}<option value="{{ s.id }}" {{ 'selected' if s.id == search_id }}>{{ s.query }}</option>{% endfor %}
+    </select>
+    <noscript><button class="btn small">Filter</button></noscript>
+  </form>
+</div>
+{% endif %}
+
+{% if not searches %}
+  <div class="empty">
+    <h2>What are you hunting for?</h2>
+    <p>Add a search like “gameboy mega man” and we'll check Marketplace near everyone in the group every day.</p>
+    <a class="btn primary" href="/searches">Add a search</a>
+  </div>
+{% elif helper_count == 0 %}
+  <div class="empty">
+    <h2>No pickup areas yet</h2>
+    <p>Finds show up once other members set a pickup area on their profile. Share the invite link with friends and coworkers in other cities.</p>
+    <a class="btn" href="/people">See who's here</a>
+  </div>
+{% elif not groups %}
+  <div class="empty">
+    {% if show == "all" and not search_id %}
+    <h2>Nothing yet</h2>
+    <p>Your searches run once a day across {{ helper_count }} pickup area{{ 's' if helper_count != 1 }}. Check back after the next scan.</p>
+    {% else %}
+    <h2>Nothing here</h2>
+    <p><a href="/finds">Show all finds</a></p>
+    {% endif %}
+  </div>
+{% endif %}
+
+{% for g in groups %}
+{% set h = g.helper %}
+<section class="area">
+  <header class="area-head">
+    <div class="avatar" aria-hidden="true">{{ h.name[:1] | upper }}</div>
+    <div class="area-text">
+      <h2>Near {{ h.name }}</h2>
+      <p class="muted">{{ h.area_label or "Area not set" }} · within {{ h.radius_display }}{% if h.contact %} · {{ h.contact }}{% endif %}</p>
+    </div>
+    <span class="count">{{ g.cards | length }} find{{ 's' if g.cards | length != 1 }}</span>
+  </header>
+  <div class="grid">
+    {% for card in g.cards %}{{ listing_card(card, next=here, helper=h) }}{% endfor %}
+  </div>
+</section>
+{% endfor %}
+{% endblock %}
